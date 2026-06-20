@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="https://kit.fontawesome.com/fba8a3fc8c.js" crossorigin="anonymous"></script>
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32"  href="favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
@@ -39,6 +40,10 @@
       max-width: 480px;
       margin: 0 auto;
     }
+    header {
+    display: flex;
+    justify-content: space-between;
+}
 
     input, button, textarea, select { font-family: inherit; }
 
@@ -309,7 +314,8 @@
 <div id="mastery-toast"></div>
 
 <header style="padding: 14px 16px 0; background: var(--surface);">
-  <div style="font-size: 42px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); text-align: center;">Карточки</div>
+  <div style="font-size: 42px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); ">Карточки</div>
+<div><img src="potato.png" ></div>
 </header>
 
 <nav id="tab-bar">
@@ -330,7 +336,7 @@
     </div>
     <div id="answer-grid"></div>
     <div id="feedback"></div>
-    <button id="next-btn">Next →</button>
+    <button id="next-btn">Next <i class="fa-solid fa-arrow-right"></i></button>
     <div id="session-stats"></div>
   </div>
 </div>
@@ -452,7 +458,7 @@ function saveMastered() {
 // ════════════════════════════════════════════════
 function showMasteryToast(word) {
   const toast = document.getElementById('mastery-toast');
-  toast.textContent = `⭐ Mastered: ${word}`;
+  toast.textContent = `<i class="fa-solid fa-award"></i> Mastered: ${word}`;
   toast.style.display = 'block';
   // reset animation
   toast.style.animation = 'none';
@@ -690,7 +696,7 @@ function updateSessionStats() {
   const el = document.getElementById('session-stats');
   if (sessionTotal === 0) { el.textContent = ''; return; }
   const pct = Math.round(sessionCorrect / sessionTotal * 100);
-  el.textContent = `Session: ${sessionCorrect}/${sessionTotal} correct (${pct}%)  ·  ⭐ ${mastered.size} mastered`;
+  el.textContent = `Session: ${sessionCorrect}/${sessionTotal} correct (${pct}%)  ·  <i class="fa-solid fa-award"></i> ${mastered.size} mastered`;
 }
 
 // ════════════════════════════════════════════════
@@ -788,15 +794,15 @@ function renderStats() {
     <br>
 
     <div class="tier-row">
-      <span class="tier-label">⭐ Mastered</span>
+      <span class="tier-label"><i class="fa-solid fa-award"></i> Mastered</span>
       <span class="tier-value tier-mastered">${masteredCount}</span>
     </div>
     <div class="tier-row">
-      <span class="tier-label">🔁 Cooling down</span>
+      <span class="tier-label"><i class="fa-regular fa-snowflake"></i> Cooling down</span>
       <span class="tier-value tier-cooling">${coolingCount}</span>
     </div>
     <div class="tier-row">
-      <span class="tier-label">📖 Unseen / active</span>
+      <span class="tier-label"><i class="fa-solid fa-book"></i> Unseen / active</span>
       <span class="tier-value tier-unseen">${unseenCount}</span>
     </div>
 
