@@ -42,7 +42,6 @@
 
     input, button, textarea, select { font-family: inherit; }
 
-    /* ── Tab bar ── */
     #tab-bar {
       display: flex;
       border-bottom: 1.5px solid var(--border);
@@ -73,7 +72,6 @@
     .tab-panel { display: none; flex: 1; flex-direction: column; padding: 20px 16px; }
     .tab-panel.active { display: flex; }
 
-    /* ── Direction label ── */
     #direction-label {
       font-size: 12px;
       font-weight: 600;
@@ -83,7 +81,6 @@
       margin-bottom: 8px;
     }
 
-    /* ── Flip card ── */
     #card-container {
       perspective: 1000px;
       margin-bottom: 28px;
@@ -98,12 +95,9 @@
       transition: transform 0.5s ease;
     }
 
-    #card-inner.flipped {
-      transform: rotateY(180deg);
-    }
+    #card-inner.flipped { transform: rotateY(180deg); }
 
-    #card-front,
-    #card-back {
+    #card-front, #card-back {
       position: absolute;
       width: 100%;
       min-height: 120px;
@@ -121,16 +115,9 @@
       text-align: center;
     }
 
-    #card-back {
-      transform: rotateY(180deg);
-      color: var(--correct);
-    }
+    #card-back { transform: rotateY(180deg); color: var(--correct); }
+    #card-back.wrong-reveal { color: var(--wrong); }
 
-    #card-back.wrong-reveal {
-      color: var(--wrong);
-    }
-
-    /* ── Answer grid ── */
     #answer-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -185,6 +172,72 @@
       text-align: center;
     }
 
+    /* ── Mastery toast ── */
+    #mastery-toast {
+      display: none;
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: #fff;
+      padding: 10px 20px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 24px;
+      box-shadow: 0 4px 16px rgba(44,31,14,0.2);
+      z-index: 100;
+      white-space: nowrap;
+      animation: fadeup 2.5s ease forwards;
+    }
+
+    @keyframes fadeup {
+      0%   { opacity: 0; transform: translateX(-50%) translateY(10px); }
+      15%  { opacity: 1; transform: translateX(-50%) translateY(0); }
+      75%  { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    /* ── Mastery progress bar ── */
+    .mastery-bar-wrap {
+      margin-bottom: 6px;
+    }
+    .mastery-bar-label {
+      font-size: 13px;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .mastery-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .mastery-bar-fill {
+      height: 6px;
+      background: var(--accent);
+      border-radius: 3px;
+      transition: width 0.4s ease;
+    }
+
+    /* ── Tier breakdown ── */
+    .tier-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      padding: 6px 0;
+      border-bottom: 0.5px solid var(--border);
+    }
+    .tier-row:last-child { border-bottom: none; }
+    .tier-label { color: var(--muted); }
+    .tier-value { font-weight: 600; color: var(--text); }
+    .tier-mastered { color: var(--accent); }
+    .tier-cooling  { color: #b87333; }
+    .tier-unseen   { color: var(--muted); }
+
     /* ── Deck editor ── */
     #deck-tab h2 { font-size: 18px; margin-bottom: 4px; }
     #deck-tab p  { font-size: 14px; color: var(--muted); margin-bottom: 20px; }
@@ -215,7 +268,6 @@
     }
 
     #editor-feedback { font-size: 14px; color: var(--correct); margin-bottom: 16px; min-height: 20px; }
-
     #custom-words-list { display: flex; flex-direction: column; gap: 8px; }
 
     .custom-word-item {
@@ -238,12 +290,10 @@
       padding: 0 4px;
     }
 
-    /* ── Stats ── */
     #stats-tab h2 { font-size: 18px; margin-bottom: 16px; }
     #stats-content { font-size: 15px; color: var(--muted); line-height: 1.8; }
     #stats-content strong { color: var(--text); }
 
-    /* ── Loading ── */
     #loading {
       display: flex;
       align-items: center;
@@ -256,6 +306,8 @@
 </head>
 <body>
 
+<div id="mastery-toast"></div>
+
 <header style="padding: 14px 16px 0; background: var(--surface);">
   <div style="font-size: 42px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); text-align: center;">Карточки</div>
 </header>
@@ -266,21 +318,16 @@
   <button class="tab-btn"        data-tab="stats-tab">Stats</button>
 </nav>
 
-<!-- ── Quiz tab ── -->
 <div id="quiz-tab" class="tab-panel active">
   <div id="loading">Loading deck…</div>
-
   <div id="quiz-content" style="display:none; flex-direction:column; flex:1;">
     <div id="direction-label"></div>
-
-    <!-- Flip card -->
     <div id="card-container">
       <div id="card-inner">
         <div id="card-front"></div>
         <div id="card-back"></div>
       </div>
     </div>
-
     <div id="answer-grid"></div>
     <div id="feedback"></div>
     <button id="next-btn">Next →</button>
@@ -288,11 +335,9 @@
   </div>
 </div>
 
-<!-- ── Deck editor tab ── -->
 <div id="deck-tab" class="tab-panel">
   <h2>Edit Deck</h2>
   <p>Add карточки or fix definitions. Your changes are saved locally in this browser.</p>
-
   <div class="field-row">
     <label>Ukrainian word</label>
     <input id="input-uk" type="text" placeholder="напр. зробити" autocomplete="off" />
@@ -305,13 +350,11 @@
     <label>Frequency weight (optional, default 50)</label>
     <input id="input-freq" type="number" placeholder="50" autocomplete="off" />
   </div>
-
   <button id="add-word-btn">Add / Update Word</button>
   <div id="editor-feedback"></div>
   <div id="custom-words-list"></div>
 </div>
 
-<!-- ── Stats tab ── -->
 <div id="stats-tab" class="tab-panel">
   <h2>Your Stats</h2>
   <div id="stats-content">Loading…</div>
@@ -321,12 +364,14 @@
 // ════════════════════════════════════════════════
 // CONFIG
 // ════════════════════════════════════════════════
-const DECK_URL        = 'v1_words.csv';
-const STORAGE_RESULTS = 'ukr_quiz_results';
-const STORAGE_CUSTOM  = 'ukr_custom_words';
-const COOLDOWN_ROUNDS = 10;
-const CANDIDATE_POOL  = 15;
-const N_DISTRACTORS   = 5;
+const DECK_URL          = 'v1_words.csv';
+const STORAGE_RESULTS   = 'ukr_quiz_results';
+const STORAGE_CUSTOM    = 'ukr_custom_words';
+const STORAGE_MASTERED  = 'ukr_mastered';
+const COOLDOWN_ROUNDS   = 10;
+const CANDIDATE_POOL    = 15;
+const N_DISTRACTORS     = 5;
+const MASTERY_THRESHOLD = 5;   // consecutive correct answers across sessions to retire a word
 
 // ════════════════════════════════════════════════
 // LEVENSHTEIN
@@ -370,7 +415,8 @@ function parseCSV(text) {
 // STATE
 // ════════════════════════════════════════════════
 let deck           = [];
-let cooldown       = {};
+let cooldown       = {};   // { word_uk: rounds_remaining }
+let mastered       = new Set(); // permanently retired words
 let sessionResults = [];
 let sessionCorrect = 0;
 let sessionTotal   = 0;
@@ -394,24 +440,83 @@ function loadCustomWords() {
 function saveCustomWords(words) {
   localStorage.setItem(STORAGE_CUSTOM, JSON.stringify(words));
 }
+function loadMastered() {
+  try { return new Set(JSON.parse(localStorage.getItem(STORAGE_MASTERED) || '[]')); } catch { return new Set(); }
+}
+function saveMastered() {
+  localStorage.setItem(STORAGE_MASTERED, JSON.stringify([...mastered]));
+}
 
 // ════════════════════════════════════════════════
-// COOLDOWN
+// MASTERY TOAST
 // ════════════════════════════════════════════════
-function buildInitialCooldown() {
+function showMasteryToast(word) {
+  const toast = document.getElementById('mastery-toast');
+  toast.textContent = `⭐ Mastered: ${word}`;
+  toast.style.display = 'block';
+  // reset animation
+  toast.style.animation = 'none';
+  toast.offsetHeight;
+  toast.style.animation = 'fadeup 2.5s ease forwards';
+  setTimeout(() => { toast.style.display = 'none'; }, 2600);
+}
+
+// ════════════════════════════════════════════════
+// COOLDOWN + MASTERY — built from prior results
+// ════════════════════════════════════════════════
+function buildInitialState() {
   const prior = loadResults();
-  if (!prior.length) return {};
+  const cd = {};
+
+  if (!prior.length) return cd;
+
+  // group attempts by word
   const byWord = {};
   for (const r of prior) {
     if (!byWord[r.word_uk]) byWord[r.word_uk] = [];
     byWord[r.word_uk].push(r.is_correct);
   }
-  const cd = {};
+
   for (const [word, attempts] of Object.entries(byWord)) {
-    const last = attempts.slice(-COOLDOWN_ROUNDS);
-    if (last.every(Boolean)) cd[word] = COOLDOWN_ROUNDS;
+    // already mastered — skip
+    if (mastered.has(word)) continue;
+
+    const last = attempts.slice(-MASTERY_THRESHOLD);
+
+    // graduate to mastered if last N attempts all correct
+    if (last.length === MASTERY_THRESHOLD && last.every(Boolean)) {
+      mastered.add(word);
+      continue;
+    }
+
+    // otherwise apply cooldown if last COOLDOWN_ROUNDS all correct
+    const lastCooldown = attempts.slice(-COOLDOWN_ROUNDS);
+    if (lastCooldown.every(Boolean)) {
+      cd[word] = COOLDOWN_ROUNDS;
+    }
   }
+
+  saveMastered();
   return cd;
+}
+
+// ════════════════════════════════════════════════
+// MASTERY CHECK — called after each correct answer
+// ════════════════════════════════════════════════
+function checkMastery(word_uk) {
+  if (mastered.has(word_uk)) return;
+
+  const prior = loadResults();
+  const attempts = prior
+    .filter(r => r.word_uk === word_uk)
+    .map(r => r.is_correct);
+
+  const last = attempts.slice(-MASTERY_THRESHOLD);
+  if (last.length === MASTERY_THRESHOLD && last.every(Boolean)) {
+    mastered.add(word_uk);
+    saveMastered();
+    showMasteryToast(word_uk);
+  }
 }
 
 // ════════════════════════════════════════════════
@@ -435,11 +540,23 @@ function pickDistractors(targetIdx) {
 
 // ════════════════════════════════════════════════
 // WEIGHTED SAMPLE
+// three tiers: mastered=0, cooling=0, unseen/active=log(value)+1
 // ════════════════════════════════════════════════
 function weightedSample() {
-  const weights = deck.map(w => cooldown[w.word_uk] ? 0 : Math.log(Number(w.value) || 1) + 1);
+  const weights = deck.map(w => {
+    if (mastered.has(w.word_uk)) return 0;
+    if (cooldown[w.word_uk])     return 0;
+    return Math.log(Number(w.value) || 1) + 1;
+  });
+
   const total = weights.reduce((a, b) => a + b, 0);
-  if (total === 0) { cooldown = {}; return weightedSample(); }
+
+  if (total === 0) {
+    // all active words are cooling — release cooldown only (not mastered)
+    for (const k of Object.keys(cooldown)) delete cooldown[k];
+    return weightedSample();
+  }
+
   let r = Math.random() * total;
   for (let i = 0; i < weights.length; i++) {
     r -= weights[i];
@@ -455,16 +572,11 @@ function resetCard(promptText) {
   const inner = document.getElementById('card-inner');
   const front = document.getElementById('card-front');
   const back  = document.getElementById('card-back');
-
-  // snap back without transition for instant reset
   inner.style.transition = 'none';
   inner.classList.remove('flipped');
   back.classList.remove('wrong-reveal');
-
-  // force reflow so the snap takes effect before re-enabling transition
   inner.offsetHeight;
   inner.style.transition = '';
-
   front.textContent = promptText;
   back.textContent  = '';
 }
@@ -485,7 +597,6 @@ function nextQuestion() {
   document.getElementById('feedback').textContent = '';
   document.getElementById('next-btn').style.display = 'none';
 
-  // decrement cooldowns
   for (const w of Object.keys(cooldown)) {
     cooldown[w]--;
     if (cooldown[w] <= 0) delete cooldown[w];
@@ -494,7 +605,6 @@ function nextQuestion() {
   const idx       = weightedSample();
   const target    = deck[idx];
   const direction = Math.random() < 0.5 ? 'uk_to_en' : 'en_to_uk';
-
   const distractors = pickDistractors(idx);
 
   let prompt, correct, choices;
@@ -536,17 +646,14 @@ function handleAnswer(btn, chosen, correct, target, direction) {
   const responseMs = Date.now() - questionStart;
   const isCorrect  = chosen === correct;
 
-  // flip card to reveal correct answer
   flipCard(correct, isCorrect);
 
-  // highlight buttons
   document.querySelectorAll('.answer-btn').forEach(b => {
     b.disabled = true;
     if (b.textContent === correct) b.classList.add('correct');
   });
   if (!isCorrect) btn.classList.add('wrong');
 
-  // feedback
   const fb = document.getElementById('feedback');
   fb.textContent = isCorrect
     ? `✓ Correct  (${responseMs}ms)`
@@ -572,6 +679,9 @@ function handleAnswer(btn, chosen, correct, target, direction) {
   sessionResults.push(entry);
   saveResult(entry);
 
+  // check mastery AFTER saving result so the new attempt is included
+  if (isCorrect) checkMastery(target.word_uk);
+
   document.getElementById('next-btn').style.display = 'block';
   updateSessionStats();
 }
@@ -580,7 +690,7 @@ function updateSessionStats() {
   const el = document.getElementById('session-stats');
   if (sessionTotal === 0) { el.textContent = ''; return; }
   const pct = Math.round(sessionCorrect / sessionTotal * 100);
-  el.textContent = `Session: ${sessionCorrect}/${sessionTotal} correct (${pct}%)`;
+  el.textContent = `Session: ${sessionCorrect}/${sessionTotal} correct (${pct}%)  ·  ⭐ ${mastered.size} mastered`;
 }
 
 // ════════════════════════════════════════════════
@@ -652,7 +762,11 @@ function renderStats() {
   const correct = all.filter(r => r.is_correct).length;
   const pct     = Math.round(correct / total * 100);
   const avgMs   = Math.round(all.reduce((a, r) => a + r.response_ms, 0) / total);
-  const cooldownCount = Object.keys(buildInitialCooldown()).length;
+
+  const masteredCount = mastered.size;
+  const coolingCount  = Object.keys(cooldown).length;
+  const unseenCount   = deck.length - masteredCount - coolingCount;
+  const masteredPct   = deck.length ? Math.round(masteredCount / deck.length * 100) : 0;
 
   const missed = {};
   for (const r of all) {
@@ -661,10 +775,36 @@ function renderStats() {
   const topMissed = Object.entries(missed).sort((a,b) => b[1]-a[1]).slice(0,5);
 
   el.innerHTML = `
+    <div class="mastery-bar-wrap">
+      <div class="mastery-bar-label">
+        <span>Mastery progress</span>
+        <span>${masteredCount} / ${deck.length} words (${masteredPct}%)</span>
+      </div>
+      <div class="mastery-bar-bg">
+        <div class="mastery-bar-fill" style="width:${masteredPct}%"></div>
+      </div>
+    </div>
+
+    <br>
+
+    <div class="tier-row">
+      <span class="tier-label">⭐ Mastered</span>
+      <span class="tier-value tier-mastered">${masteredCount}</span>
+    </div>
+    <div class="tier-row">
+      <span class="tier-label">🔁 Cooling down</span>
+      <span class="tier-value tier-cooling">${coolingCount}</span>
+    </div>
+    <div class="tier-row">
+      <span class="tier-label">📖 Unseen / active</span>
+      <span class="tier-value tier-unseen">${unseenCount}</span>
+    </div>
+
+    <br>
+
     <strong>Total answers:</strong> ${total}<br>
     <strong>Correct:</strong> ${correct} (${pct}%)<br>
     <strong>Avg response time:</strong> ${avgMs}ms<br>
-    <strong>Words on cooldown:</strong> ${cooldownCount}<br>
     <strong>Custom words added:</strong> ${loadCustomWords().length}<br>
     <br>
     <strong>Most missed words:</strong><br>
@@ -697,15 +837,21 @@ async function init() {
     const res  = await fetch(DECK_URL);
     const text = await res.text();
     deck = parseCSV(text);
+
     const custom = loadCustomWords();
     for (const cw of custom) {
       const i = deck.findIndex(w => w.word_uk === cw.word_uk);
       if (i >= 0) deck[i] = cw;
       else deck.push(cw);
     }
-    cooldown = buildInitialCooldown();
+
+    // load mastered set first so buildInitialState can reference it
+    mastered = loadMastered();
+    cooldown = buildInitialState();
+
     document.getElementById('loading').style.display     = 'none';
     document.getElementById('quiz-content').style.display = 'flex';
+
     nextQuestion();
 
     document.getElementById('card-container').addEventListener('click', () => {
@@ -718,6 +864,7 @@ async function init() {
       `Failed to load deck. Make sure v1_words.csv is in the same folder. (${e.message})`;
   }
 }
+
 init();
 </script>
 </body>
