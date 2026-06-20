@@ -437,7 +437,7 @@ function pickDistractors(targetIdx) {
 // WEIGHTED SAMPLE
 // ════════════════════════════════════════════════
 function weightedSample() {
-  const weights = deck.map(w => cooldown[w.word_uk] ? 0 : Number(w.value) || 1);
+  const weights = deck.map(w => cooldown[w.word_uk] ? 0 : Math.log(Number(w.value) || 1) + 1);
   const total = weights.reduce((a, b) => a + b, 0);
   if (total === 0) { cooldown = {}; return weightedSample(); }
   let r = Math.random() * total;
@@ -697,26 +697,27 @@ async function init() {
     const res  = await fetch(DECK_URL);
     const text = await res.text();
     deck = parseCSV(text);
-
     const custom = loadCustomWords();
     for (const cw of custom) {
       const i = deck.findIndex(w => w.word_uk === cw.word_uk);
       if (i >= 0) deck[i] = cw;
       else deck.push(cw);
     }
-
     cooldown = buildInitialCooldown();
-
     document.getElementById('loading').style.display     = 'none';
     document.getElementById('quiz-content').style.display = 'flex';
-
     nextQuestion();
+
+    document.getElementById('card-container').addEventListener('click', () => {
+      if (!answered) return;
+      document.getElementById('card-inner').classList.toggle('flipped');
+    });
+
   } catch (e) {
     document.getElementById('loading').textContent =
       `Failed to load deck. Make sure v1_words.csv is in the same folder. (${e.message})`;
   }
 }
-
 init();
 </script>
 </body>
