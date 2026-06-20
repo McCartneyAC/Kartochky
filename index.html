@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Карточки</title>
+  <style>
+    /* ── Reset & base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #f9f7f4;
+      --surface:   #ffffff;
+      --border:    #e0dbd3;
+      --text:      #1a1a1a;
+      --muted:     #7a7570;
+      --accent:    #2c5f9e;
+      --correct:   #1e7d4b;
+      --wrong:     #b83232;
+      --btn-bg:    #ffffff;
+      --btn-hover: #eef3fa;
+      --radius:    12px;
+      --tab-h:     52px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    /* ── Tab bar ── */
+    #tab-bar {
+      display: flex;
+      border-bottom: 1.5px solid var(--border);
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .tab-btn {
+      flex: 1;
+      height: var(--tab-h);
+      border: none;
+      background: none;
+      font-size: 14px;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2.5px solid transparent;
+      transition: color .15s, border-color .15s;
+    }
+
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* ── Tab panels ── */
+    .tab-panel { display: none; flex: 1; flex-direction: column; padding: 20px 16px; }
+    .tab-panel.active { display: flex; }
+
+    /* ── Quiz tab ── */
+    #direction-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    #prompt-word {
+      font-size: 36px;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 28px;
+      min-height: 88px;
+      display: flex;
+      align-items: center;
+    }
+
+    #answer-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .answer-btn {
+      width: 100%;
+      padding: 16px 18px;
+      background: var(--btn-bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 17px;
+      text-align: left;
+      cursor: pointer;
+      transition: background .12s, border-color .12s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .answer-btn:active { background: var(--btn-hover); }
+    .answer-btn.correct { background: #e6f4ed; border-color: var(--correct); color: var(--correct); font-weight: 600; }
+    .answer-btn.wrong   { background: #faeaea; border-color: var(--wrong);   color: var(--wrong); }
+    .answer-btn:disabled { cursor: default; }
+
+    #feedback {
+      font-size: 15px;
+      min-height: 24px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    #next-btn {
+      width: 100%;
+      padding: 16px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      display: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #session-stats {
+      margin-top: auto;
+      padding-top: 16px;
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    /* ── Deck editor tab ── */
+    #deck-tab h2 { font-size: 18px; margin-bottom: 4px; }
+    #deck-tab p  { font-size: 14px; color: var(--muted); margin-bottom: 20px; }
+
+    .field-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .field-row label { font-size: 13px; font-weight: 600; color: var(--muted); }
+    .field-row input {
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 16px;
+      background: var(--surface);
+      width: 100%;
+    }
+    .field-row input:focus { outline: none; border-color: var(--accent); }
+
+    #add-word-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 24px;
+    }
+
+    #editor-feedback { font-size: 14px; color: var(--correct); margin-bottom: 16px; min-height: 20px; }
+
+    #custom-words-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .custom-word-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 15px;
+    }
+
+    .custom-word-item button {
+      background: none;
+      border: none;
+      color: var(--wrong);
+      font-size: 18px;
+      cursor: pointer;
+      padding: 0 4px;
+    }
+
+    /* ── Stats tab ── */
+    #stats-tab h2 { font-size: 18px; margin-bottom: 16px; }
+    #stats-content { font-size: 15px; color: var(--muted); line-height: 1.8; }
+    #stats-content strong { color: var(--text); }
+
+    /* ── Loading / error ── */
+    #loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      font-size: 16px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header style="padding: 14px 16px 0; background: var(--surface);">
+  <div style="font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted);">Карточки</div>
+</header>
+
+<!-- Tab bar -->
+<nav id="tab-bar">
+  <button class="tab-btn active" data-tab="quiz-tab">Quiz</button>
+  <button class="tab-btn"        data-tab="deck-tab">Deck</button>
+  <button class="tab-btn"        data-tab="stats-tab">Stats</button>
+</nav>
+
+<!-- ── Quiz tab ── -->
+<div id="quiz-tab" class="tab-panel active">
+  <div id="loading">Loading deck…</div>
+
+  <div id="quiz-content" style="display:none; flex-direction:column; flex:1;">
+    <div id="direction-label"></div>
+    <div id="prompt-word"></div>
+    <div id="answer-grid"></div>
+    <div id="feedback"></div>
+    <button id="next-btn">Next →</button>
+    <div id="session-stats"></div>
+  </div>
+</div>
+
+<!-- ── Deck editor tab ── -->
+<div id="deck-tab" class="tab-panel">
+  <h2>Edit Deck</h2>
+  <p>Add карточки or fix definitions. Your changes are saved locally in this browser.</p>
+
+  <div class="field-row">
+    <label>Ukrainian word</label>
+    <input id="input-uk" type="text" placeholder="напр. зробити" autocomplete="off" />
+  </div>
+  <div class="field-row">
+    <label>English gloss</label>
+    <input id="input-en" type="text" placeholder="e.g. to do / make" autocomplete="off" />
+  </div>
+  <div class="field-row">
+    <label>Frequency weight (optional, default 50)</label>
+    <input id="input-freq" type="number" placeholder="50" autocomplete="off" />
+  </div>
+
+  <button id="add-word-btn">Add / Update Word</button>
+  <div id="editor-feedback"></div>
+
+  <div id="custom-words-list"></div>
+</div>
+
+<!-- ── Stats tab ── -->
+<div id="stats-tab" class="tab-panel">
+  <h2>Your Stats</h2>
+  <div id="stats-content">Loading…</div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════
+// CONFIG
+// ════════════════════════════════════════════════
+const DECK_URL          = 'v1_words.csv';
+const STORAGE_RESULTS   = 'ukr_quiz_results';
+const STORAGE_CUSTOM    = 'ukr_custom_words';
+const COOLDOWN_ROUNDS   = 10;
+const CANDIDATE_POOL    = 15;
+const N_DISTRACTORS     = 5;
+
+// ════════════════════════════════════════════════
+// LEVENSHTEIN (inline, no deps)
+// ════════════════════════════════════════════════
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({length: m + 1}, (_, i) => [i]);
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] = a[i-1] === b[j-1]
+        ? dp[i-1][j-1]
+        : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+    }
+  }
+  return dp[m][n];
+}
+
+// ════════════════════════════════════════════════
+// CSV PARSER
+// ════════════════════════════════════════════════
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+  return lines.slice(1).map(line => {
+    // handle quoted fields
+    const cols = [];
+    let cur = '', inQ = false;
+    for (const ch of line) {
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+      else cur += ch;
+    }
+    cols.push(cur.trim());
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = cols[i] ?? '');
+    return obj;
+  }).filter(r => r.word_uk && r.word_en);
+}
+
+// ════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════
+let deck        = [];      // [{word_uk, word_en, value, len}]
+let cooldown    = {};      // { word_uk: rounds_remaining }
+let sessionResults = [];   // accumulated this session
+let sessionCorrect = 0;
+let sessionTotal   = 0;
+let questionStart  = null;
+let currentTarget  = null;
+let currentCorrect = null;
+let answered       = false;
+
+// ════════════════════════════════════════════════
+// PERSISTENT STORAGE
+// ════════════════════════════════════════════════
+function loadResults() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_RESULTS) || '[]'); } catch { return []; }
+}
+
+function saveResult(entry) {
+  const all = loadResults();
+  all.push(entry);
+  localStorage.setItem(STORAGE_RESULTS, JSON.stringify(all));
+}
+
+function loadCustomWords() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_CUSTOM) || '[]'); } catch { return []; }
+}
+
+function saveCustomWords(words) {
+  localStorage.setItem(STORAGE_CUSTOM, JSON.stringify(words));
+}
+
+// ════════════════════════════════════════════════
+// COOLDOWN — seeded from prior results
+// ════════════════════════════════════════════════
+function buildInitialCooldown() {
+  const prior = loadResults();
+  if (!prior.length) return {};
+  // group by word_uk, take last COOLDOWN_ROUNDS attempts
+  const byWord = {};
+  for (const r of prior) {
+    if (!byWord[r.word_uk]) byWord[r.word_uk] = [];
+    byWord[r.word_uk].push(r.is_correct);
+  }
+  const cd = {};
+  for (const [word, attempts] of Object.entries(byWord)) {
+    const last = attempts.slice(-COOLDOWN_ROUNDS);
+    if (last.every(Boolean)) cd[word] = COOLDOWN_ROUNDS;
+  }
+  return cd;
+}
+
+// ════════════════════════════════════════════════
+// DISTRACTOR SELECTION
+// ════════════════════════════════════════════════
+function pickDistractors(targetIdx, direction) {
+  const target = deck[targetIdx];
+  const targetKey = direction === 'uk_to_en' ? 'word_en' : 'word_uk';
+  const compareKey = 'word_uk'; // always compare Ukrainian forms for Levenshtein
+
+  const pool = deck
+    .filter((w, i) => {
+      if (i === targetIdx) return false;
+      if (w.word_en.toLowerCase().trim() === target.word_en.toLowerCase().trim()) return false;
+      return true;
+    })
+    .map(w => ({ ...w, dist: levenshtein(target.word_uk, w.word_uk) }))
+    .sort((a, b) => a.dist - b.dist)
+    .slice(0, CANDIDATE_POOL);
+
+  // uniform sample N_DISTRACTORS from pool
+  const shuffled = pool.sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, N_DISTRACTORS);
+}
+
+// ════════════════════════════════════════════════
+// WEIGHTED SAMPLE (frequency-biased, cooldown-aware)
+// ════════════════════════════════════════════════
+function weightedSample() {
+  const weights = deck.map(w => cooldown[w.word_uk] ? 0 : Number(w.value) || 1);
+  const total = weights.reduce((a, b) => a + b, 0);
+  if (total === 0) {
+    // all on cooldown — reset
+    cooldown = {};
+    return weightedSample();
+  }
+  let r = Math.random() * total;
+  for (let i = 0; i < weights.length; i++) {
+    r -= weights[i];
+    if (r <= 0) return i;
+  }
+  return deck.length - 1;
+}
+
+// ════════════════════════════════════════════════
+// QUIZ LOGIC
+// ════════════════════════════════════════════════
+function nextQuestion() {
+  answered = false;
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('next-btn').style.display = 'none';
+
+  // decrement cooldowns
+  for (const w of Object.keys(cooldown)) {
+    cooldown[w]--;
+    if (cooldown[w] <= 0) delete cooldown[w];
+  }
+
+  const idx       = weightedSample();
+  const target    = deck[idx];
+  const direction = Math.random() < 0.5 ? 'uk_to_en' : 'en_to_uk';
+  currentTarget   = target;
+
+  const distractors = pickDistractors(idx, direction);
+
+  let prompt, correct, choices;
+  if (direction === 'uk_to_en') {
+    prompt  = target.word_uk;
+    correct = target.word_en;
+    choices = [correct, ...distractors.map(d => d.word_en)];
+  } else {
+    prompt  = target.word_en;
+    correct = target.word_uk;
+    choices = [correct, ...distractors.map(d => d.word_uk)];
+  }
+
+  currentCorrect = correct;
+
+  // shuffle choices
+  choices = choices.sort(() => Math.random() - 0.5);
+
+  // render
+  document.getElementById('direction-label').textContent =
+    direction === 'uk_to_en' ? 'UA → EN' : 'EN → UA';
+  document.getElementById('prompt-word').textContent = prompt;
+
+  const grid = document.getElementById('answer-grid');
+  grid.innerHTML = '';
+  for (const choice of choices) {
+    const btn = document.createElement('button');
+    btn.className   = 'answer-btn';
+    btn.textContent = choice;
+    btn.addEventListener('click', () => handleAnswer(btn, choice, correct, target, direction));
+    grid.appendChild(btn);
+  }
+
+  questionStart = Date.now();
+  updateSessionStats();
+}
+
+function handleAnswer(btn, chosen, correct, target, direction) {
+  if (answered) return;
+  answered = true;
+
+  const responseMs = Date.now() - questionStart;
+  const isCorrect  = chosen === correct;
+
+  // highlight buttons
+  const allBtns = document.querySelectorAll('.answer-btn');
+  allBtns.forEach(b => {
+    b.disabled = true;
+    if (b.textContent === correct) b.classList.add('correct');
+  });
+  if (!isCorrect) btn.classList.add('wrong');
+
+  // feedback
+  const fb = document.getElementById('feedback');
+  fb.textContent = isCorrect
+    ? `✓ Correct  (${responseMs}ms)`
+    : `✗ Wrong — correct answer: ${correct}  (${responseMs}ms)`;
+  fb.style.color = isCorrect ? 'var(--correct)' : 'var(--wrong)';
+
+  // cooldown
+  if (isCorrect) {
+    cooldown[target.word_uk] = COOLDOWN_ROUNDS;
+    sessionCorrect++;
+  }
+  sessionTotal++;
+
+  // persist
+  const entry = {
+    timestamp:      new Date().toISOString(),
+    word_uk:        target.word_uk,
+    word_en:        target.word_en,
+    direction,
+    correct_answer: correct,
+    chosen_answer:  chosen,
+    is_correct:     isCorrect,
+    response_ms:    responseMs,
+  };
+  sessionResults.push(entry);
+  saveResult(entry);
+
+  document.getElementById('next-btn').style.display = 'block';
+  updateSessionStats();
+}
+
+function updateSessionStats() {
+  const el = document.getElementById('session-stats');
+  if (sessionTotal === 0) { el.textContent = ''; return; }
+  const pct = Math.round(sessionCorrect / sessionTotal * 100);
+  el.textContent = `Session: ${sessionCorrect}/${sessionTotal} correct (${pct}%)`;
+}
+
+// ════════════════════════════════════════════════
+// DECK EDITOR
+// ════════════════════════════════════════════════
+function renderCustomWords() {
+  const list  = document.getElementById('custom-words-list');
+  const words = loadCustomWords();
+  list.innerHTML = '';
+  if (!words.length) {
+    list.innerHTML = '<p style="color:var(--muted);font-size:14px">No custom words yet.</p>';
+    return;
+  }
+  for (const w of words) {
+    const item = document.createElement('div');
+    item.className = 'custom-word-item';
+    item.innerHTML = `
+      <span><strong>${w.word_uk}</strong> — ${w.word_en}</span>
+      <button data-uk="${w.word_uk}" title="Remove">✕</button>
+    `;
+    item.querySelector('button').addEventListener('click', () => removeCustomWord(w.word_uk));
+    list.appendChild(item);
+  }
+}
+
+function addCustomWord() {
+  const uk   = document.getElementById('input-uk').value.trim();
+  const en   = document.getElementById('input-en').value.trim();
+  const freq = Number(document.getElementById('input-freq').value) || 50;
+  const fb   = document.getElementById('editor-feedback');
+
+  if (!uk || !en) { fb.textContent = 'Please fill in both fields.'; fb.style.color = 'var(--wrong)'; return; }
+
+  const words = loadCustomWords();
+  const existing = words.findIndex(w => w.word_uk === uk);
+  const entry = { word_uk: uk, word_en: en, value: freq, len: uk.length };
+
+  if (existing >= 0) {
+    words[existing] = entry;
+    // also update live deck
+    const di = deck.findIndex(w => w.word_uk === uk);
+    if (di >= 0) deck[di] = entry;
+  } else {
+    words.push(entry);
+    deck.push(entry);
+  }
+
+  saveCustomWords(words);
+  fb.textContent = existing >= 0 ? `Updated "${uk}".` : `Added "${uk}" to deck.`;
+  fb.style.color = 'var(--correct)';
+  document.getElementById('input-uk').value   = '';
+  document.getElementById('input-en').value   = '';
+  document.getElementById('input-freq').value = '';
+  renderCustomWords();
+}
+
+function removeCustomWord(uk) {
+  const words = loadCustomWords().filter(w => w.word_uk !== uk);
+  saveCustomWords(words);
+  deck = deck.filter(w => w.word_uk !== uk || words.some(c => c.word_uk === w.word_uk));
+  renderCustomWords();
+}
+
+// ════════════════════════════════════════════════
+// STATS TAB
+// ════════════════════════════════════════════════
+function renderStats() {
+  const all = loadResults();
+  const el  = document.getElementById('stats-content');
+  if (!all.length) { el.textContent = 'No data yet — complete some questions first.'; return; }
+
+  const total    = all.length;
+  const correct  = all.filter(r => r.is_correct).length;
+  const pct      = Math.round(correct / total * 100);
+  const avgMs    = Math.round(all.reduce((a, r) => a + r.response_ms, 0) / total);
+  const cooldownCount = Object.keys(buildInitialCooldown()).length;
+
+  // top 5 missed words
+  const missed = {};
+  for (const r of all) {
+    if (!r.is_correct) missed[r.word_uk] = (missed[r.word_uk] || 0) + 1;
+  }
+  const topMissed = Object.entries(missed).sort((a,b) => b[1]-a[1]).slice(0,5);
+
+  el.innerHTML = `
+    <strong>Total answers:</strong> ${total}<br>
+    <strong>Correct:</strong> ${correct} (${pct}%)<br>
+    <strong>Avg response time:</strong> ${avgMs}ms<br>
+    <strong>Words on cooldown:</strong> ${cooldownCount}<br>
+    <strong>Custom words added:</strong> ${loadCustomWords().length}<br>
+    <br>
+    <strong>Most missed words:</strong><br>
+    ${topMissed.length
+      ? topMissed.map(([w, n]) => `${w} (${n}×)`).join('<br>')
+      : 'None yet.'}
+  `;
+}
+
+// ════════════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════════════
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    const panel = document.getElementById(btn.dataset.tab);
+    panel.classList.add('active');
+    if (btn.dataset.tab === 'deck-tab')  renderCustomWords();
+    if (btn.dataset.tab === 'stats-tab') renderStats();
+  });
+});
+
+document.getElementById('add-word-btn').addEventListener('click', addCustomWord);
+document.getElementById('next-btn').addEventListener('click', nextQuestion);
+
+// ════════════════════════════════════════════════
+// INIT — fetch deck, merge custom words, start
+// ════════════════════════════════════════════════
+async function init() {
+  try {
+    const res  = await fetch(DECK_URL);
+    const text = await res.text();
+    deck = parseCSV(text);
+
+    // merge custom words (add or override)
+    const custom = loadCustomWords();
+    for (const cw of custom) {
+      const i = deck.findIndex(w => w.word_uk === cw.word_uk);
+      if (i >= 0) deck[i] = cw;
+      else deck.push(cw);
+    }
+
+    // seed cooldown from prior session results
+    cooldown = buildInitialCooldown();
+
+    document.getElementById('loading').style.display    = 'none';
+    document.getElementById('quiz-content').style.display = 'flex';
+
+    nextQuestion();
+  } catch (e) {
+    document.getElementById('loading').textContent =
+      `Failed to load deck. Make sure v1_words.csv is in the same folder. (${e.message})`;
+  }
+}
+
+init();
+</script>
+</body>
+</html>
