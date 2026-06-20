@@ -1,7 +1,7 @@
 # Kartochky
 ### vibe-coding a ukrainian flashcards app with my preferred structure
 
-![A potato on a flashcard. Kartoshka on Kartochka.](https://github.com/McCartneyAC/Kartochky/blob/main/image.jpg?raw=true)
+![A potato on a flashcard. Kartoshka on Kartochka.](https://github.com/McCartneyAC/Kartochky/blob/main/android-chrome-192x192.png?raw=true)
 
 Initial data from the closed-caption frequency dataset here:
 https://github.com/hermitdave/FrequencyWords/blob/master/content/2018/uk/uk_50k.txt
