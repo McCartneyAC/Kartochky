@@ -33,3 +33,6 @@ the closest 15 distractor words are chosen, then randomly sample 5 distractors a
 the cooldown period for words is based on implicit difficulty, as a function of how long the user needed to choose the right word. Words with more automaticity are given a longer cooldown. 
 
 Users should in principle be able to add their own dictionary words with an explicit frequency if they wish to test them more often. 
+
+
+![A screenshot of example gameplay with lots of distractor words that sound alike to the target word](https://github.com/McCartneyAC/Kartochky/blob/main/example.png?raw=true)
