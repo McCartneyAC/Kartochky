@@ -12,19 +12,19 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:        #f9f7f4;
-      --surface:   #ffffff;
-      --border:    #e0dbd3;
-      --text:      #1a1a1a;
-      --muted:     #7a7570;
-      --accent:    #2c5f9e;
-      --correct:   #1e7d4b;
-      --wrong:     #b83232;
-      --btn-bg:    #ffffff;
-      --btn-hover: #eef3fa;
-      --radius:    12px;
-      --tab-h:     52px;
-    }
+  --bg:        #f5f0e8;   /* aged paper */
+  --surface:   #faf7f2;   /* slightly lighter parchment for cards */
+  --border:    #c9b99a;   /* warm tan, like a book spine */
+  --text:      #2c1f0e;   /* dark brown ink, not pure black */
+  --muted:     #8c7355;   /* faded ink, mid-brown */
+  --accent:    #7a4419;   /* burnt sienna / dark amber */
+  --correct:   #3d6b45;   /* muted sage green, ink not neon */
+  --wrong:     #8c2e1a;   /* dark brick, not alarm-red */
+  --btn-bg:    #faf7f2;   /* parchment buttons */
+  --btn-hover: #ede4d4;   /* slightly darker parchment on tap */
+  --radius:    8px;        /* slightly less rounded — more bookish, less app-y */
+  --tab-h:     52px;
+}
 
     body {
       font-family: "Caveat", cursive;
@@ -86,9 +86,11 @@
       font-weight: 700;
       line-height: 1.2;
       margin-bottom: 28px;
+      text-align: center;
       min-height: 88px;
       display: flex;
       align-items: center;
+      box-shadow: 0 3px 5px rgba(44, 31, 14, 0.12), 0 4px 12px rgba(44, 31, 14, 0.08);
     }
 
     #answer-grid {
@@ -104,8 +106,8 @@
       background: var(--btn-bg);
       border: 1.5px solid var(--border);
       border-radius: var(--radius);
-      font-size: 17px;
-      text-align: left;
+      font-size: 30px;
+      text-align: center;
       cursor: pointer;
       transition: background .12s, border-color .12s;
       -webkit-tap-highlight-color: transparent;
