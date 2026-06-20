@@ -691,12 +691,11 @@ function handleAnswer(btn, chosen, correct, target, direction) {
   document.getElementById('next-btn').style.display = 'block';
   updateSessionStats();
 }
-
 function updateSessionStats() {
   const el = document.getElementById('session-stats');
   if (sessionTotal === 0) { el.textContent = ''; return; }
   const pct = Math.round(sessionCorrect / sessionTotal * 100);
-  el.textContent = `Session: ${sessionCorrect}/${sessionTotal} correct (${pct}%)  ·  <i class="fa-solid fa-award"></i> ${mastered.size} mastered`;
+  el.innerHTML = `Session: ${sessionCorrect}/${sessionTotal} correct (${pct}%)  ·  <i class="fa-solid fa-award"></i> ${mastered.size} mastered`;
 }
 
 // ════════════════════════════════════════════════
