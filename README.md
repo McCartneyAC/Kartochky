@@ -11,7 +11,7 @@ https://raw.githubusercontent.com/titoBouzout/Dictionaries/master/Ukrainian_uk_U
 
 The English equivalents were derived via google-translate (on google sheets at scale) so these will require a lot of manual work in the data. Approx 8,000 target words come default. 
 
-Target words are chosen randomly with a bias to the original frequency of useage in the closed-caption dataset, so the flashcards will test more common words first. 
+Target words are chosen randomly with a bias to the original frequency of useage in the closed-caption dataset, so the flashcards will test more common words first. (We had to adjust this to log scale because word use is zipf distributed and the app was over-showing common words with maddening frequency)
 
 Distractor choices are chosen via levenshtein distance, so the distractor words should "feel" very close to the target word, making them more distracting. for example:
 ```r
